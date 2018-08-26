@@ -19,21 +19,21 @@ class GSpreadSheet:
     def __init__(self, spreadsheet, read_range_name, append_range_name) -> None:
         self.spreadsheet = spreadsheet
         self.read_range_name = read_range_name
-        self.append_range_name = append_range_name
+        self.append_range = append_range_name
         creds = init_credentials()
         self.service = build('sheets', 'v4', http=creds.authorize(Http()))
 
-    def append(self, service, data):
-        service.spreadsheets().values().append(spreadsheetId=self.spreadsheet,
-                                               range=self.append_range_name,
-                                               valueInputOption="USER_ENTERED",
-                                               body={'values': [data]}
-                                               ).execute()
+    def append(self, data):
+        self.service.spreadsheets().values().append(spreadsheetId=self.spreadsheet,
+                                                    range=self.append_range,
+                                                    valueInputOption="USER_ENTERED",
+                                                    body={'values': [data]}
+                                                    ).execute()
 
-    def read_range(self, service):
-        result = service.spreadsheets().values().get(spreadsheetId=self.spreadsheet,
-                                                     range=self.read_range_name,
-                                                     ).execute()
+    def read_range(self):
+        result = self.service.spreadsheets().values().get(spreadsheetId=self.spreadsheet,
+                                                          range=self.read_range_name,
+                                                          ).execute()
         values = result.get('values', [])
         return values
 

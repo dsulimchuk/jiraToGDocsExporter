@@ -3,7 +3,6 @@ from datetime import datetime
 
 import keyring
 
-import gspreadsheet
 from gspreadsheet import GSpreadSheet
 from jiraTimeAggregator import JiraTimeAggregator
 
@@ -19,21 +18,26 @@ def main():
     jira_client = init_jira()
 
     gservice = GSpreadSheet(SPREADSHEET_ID, READ_RANGE_NAME, APPEND_RANGE_NAME)
-    query = gservice.read_range[0]
+    query = gservice.read_range()[0]
     print(query)
 
     result = jira_client.query(query[1])
     print(result)
     time = str(datetime.now())
-    gspreadsheet.append(gservice, [time, result['originalEstimate'], result['timespent']])
+    data = [time, result['originalEstimate'], result['timespent']]
+    print("Try to append: ", data)
+    gservice.append(data)
 
 
 def init_jira():
     jira_password = keyring.get_password(JIRA_URL, JIRA_USER)
     if jira_password is None:
         jira_password = getpass.getpass()
+        print(jira_password)
         jira_client = JiraTimeAggregator(JIRA_URL, JIRA_USER, jira_password)
         keyring.set_password(JIRA_URL, JIRA_USER, jira_password)
+        return jira_client
+    jira_client = JiraTimeAggregator(JIRA_URL, JIRA_USER, jira_password)
     return jira_client
 
 
